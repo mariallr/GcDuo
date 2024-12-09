@@ -28,7 +28,7 @@
 #' @return A List
 #' @export
 #'
-ConsProcessing <- function(GcDuoObject, DuoResults, lib, win_width = 10)
+ConsProcessing2 <- function(GcDuoObject, DuoResults, lib, win_width = 10)
   {
   require(dplyr)
   suppressWarnings(library(doSNOW))
@@ -148,78 +148,94 @@ Constrainedmcr <- function(DuoPeak, GcDuoObject, DuoResults, lib_matrix){
       row.names(spec_std) <- DuoPeak$Name
     }
 
-    # if(all(spec_std == 0)) {
-    #   next
-    # }
+    if(!all(spec_std == 0)) {
 
-    #get the number of peaks to extract
-    n = ifelse(is.null(nrow(spec_std)) == F, nrow(spec_std), 1) #num of components
+      #get the number of peaks to extract
+      n = ifelse(is.null(nrow(spec_std)) == F, nrow(spec_std), 1) #num of components
 
-    # MCR fixed
+      # MCR fixed
 
-    matrix_2d <- apply(GcDuoObject$data4D[,,(rt2_pos-DuoPeak$win_width):(rt2_pos+DuoPeak$win_width),rt1_pos], c(2), as.vector)
+      matrix_2d <- apply(GcDuoObject$data4D[,,(rt2_pos-DuoPeak$win_width):(rt2_pos+DuoPeak$win_width),rt1_pos], c(2), as.vector)
 
-    # define constraints for contributions
-    cc <- list(
-      mdatools::constraint("nonneg")
-    )
+      # define constraints for contributions
+      cc <- list(
+        mdatools::constraint("nonneg")
+      )
 
-    # define constraints for spectra
-    cs <- list(
-      mdatools::constraint("nonneg"),
-      mdatools::constraint("norm", params = list(type = "area"))
-    )
+      # define constraints for spectra
+      cs <- list(
+        mdatools::constraint("nonneg"),
+        mdatools::constraint("norm", params = list(type = "area"))
+      )
 
-    mcr1 <- mdatools::mcrals(matrix_2d, ncomp = n, cont.constraints = cc, spec.constraints = cs,
-                            spec.forced = matrix(t(spec_std), nrow = length(GcDuoObject$mz))) #ortnon
+      mcr1 <- mdatools::mcrals(matrix_2d, ncomp = n, cont.constraints = cc, spec.constraints = cs,
+                              spec.forced = matrix(t(spec_std), nrow = length(GcDuoObject$mz))) #ortnon
 
 
-    mcr_tic <- matrix(mcr1$rescont, ncol = dim(GcDuoObject$data4D[,,(rt2_pos-DuoPeak$win_width):(rt2_pos+DuoPeak$win_width),rt1_pos])[3])
+      mcr_tic <- matrix(mcr1$rescont, ncol = dim(GcDuoObject$data4D[,,(rt2_pos-DuoPeak$win_width):(rt2_pos+DuoPeak$win_width),rt1_pos])[3])
 
-    # For each component extracted of mcr
-    for (i in 1:mcr1$ncomp){ #get the information for each component
-      plot(mcr1$rescont[,1], type = "l")
+      # For each component extracted of mcr
+      for (i in 1:mcr1$ncomp){ #get the information for each component
+        plot(mcr1$rescont[,1], type = "l")
 
-      # Get the retention time 2 of the apex
-      rt2 <- mean(apply(mcr_tic, 1, which.max))
+        # Get the retention time 2 of the apex
+        rt2 <- mean(apply(mcr_tic, 1, which.max))
 
-      #Get the spectra
-      load_spec <- mcr1$resspec[,i]
+        #Get the spectra
+        load_spec <- mcr1$resspec[,i]
 
 
-        #summary table
-        peak_inf <- data.frame("id" = paste(DuoPeak$peak_coord, i, sep = "-"),
-                               "compound" = DuoPeak$Name,
-                               "time1d" = GcDuoObject$time1d[rt1_pos],
-                               "time2D"= GcDuoObject$time2d[(rt2_pos - DuoPeak$win_width):(rt2_pos + DuoPeak$win_width)][round(rt2,0)],
-                               "max_mz" = GcDuoObject$mz[which.max(load_spec)],
-                               "int" = sum(mcr_tic[ ,round(rt2,0)]),
-                               "sn" = (2*sum(mcr_tic[ ,round(rt2,0)])),
-                               "sim" = DuoPeak$sim,
-                               "rsim" = DuoPeak$rsim
-        )
+          #summary table
+          peak_inf <- data.frame("id" = paste(DuoPeak$peak_coord, i, sep = "-"),
+                                 "compound" = DuoPeak$Name,
+                                 "time1d" = GcDuoObject$time1d[rt1_pos],
+                                 "time2D"= GcDuoObject$time2d[(rt2_pos - DuoPeak$win_width):(rt2_pos + DuoPeak$win_width)][round(rt2,0)],
+                                 "max_mz" = GcDuoObject$mz[which.max(load_spec)],
+                                 "int" = sum(mcr_tic[ ,round(rt2,0)]),
+                                 "sn" = (2*sum(mcr_tic[ ,round(rt2,0)])),
+                                 "sim" = DuoPeak$sim,
+                                 "rsim" = DuoPeak$rsim
+          )
 
-        #print(peak_inf)
-        temp$temp_peak <- peak_inf
-        temp$temp_spek <- load_spec
+          #print(peak_inf)
+          temp$temp_peak <- peak_inf
+          temp$temp_spek <- load_spec
 
-        ## Compute area and intensity
-        for(f in 1:nrow(mcr_tic)) { #for each file
+          ## Compute area and intensity
+          for(f in 1:nrow(mcr_tic)) { #for each file
 
-          cut_data <- mcr_tic[f, ]
+            cut_data <- mcr_tic[f, ]
 
-          if(all(cut_data == 0)) {
-            next
+            if(all(cut_data == 0)) {
+              next
+            }
+
+            #area of the peak
+            temp$temp_ar[,f] <- (bayestestR::area_under_curve(seq(1,length(cut_data)),
+                                                            cut_data))
+
+            #intestity of the peak
+            temp$temp_int[,f] <- sum(mcr_tic[f,])
           }
-
-          #area of the peak
-          temp$temp_ar[,f] <- (bayestestR::area_under_curve(seq(1,length(cut_data)),
-                                                          cut_data))
-
-          #intestity of the peak
-          temp$temp_int[,f] <- sum(mcr_tic[f,])
-        }
       }
+    } else {
+      peak_inf <- data.frame("id" = paste(DuoPeak$peak_coord, 1, sep = "-"),
+                             "compound" = DuoPeak$Name,
+                             "time1d" = DuoPeak$RT1D,
+                             "time2D"= DuoPeak$RT2D,
+                             "max_mz" = NA,
+                             "int" = NA,
+                             "sn" = NA,
+                             "sim" = NA,
+                             "rsim" = NA
+      )
+
+      temp$temp_peak <- peak_inf
+      temp$temp_spek <- spec_std
+
+      temp$temp_ar <- matrix(NA, ncol = length(GcDuoObject$files))
+      temp$temp_int <- matrix(NA, ncol = length(GcDuoObject$files))
+    }
 
     colnames(temp$temp_ar) <- GcDuoObject$files
     colnames(temp$temp_int) <- GcDuoObject$files
