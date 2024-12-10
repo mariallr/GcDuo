@@ -42,7 +42,7 @@ visualizeChrom3D <- function(GcDuoObject, sampleNum = 1)
 
   ticred[ticred == 0] <- 0.0000001
 
-  ticred <- log(ticred,10)
+  #ticred <- log(ticred,10)
 
   plot_ly(x = GcDuoObject$time1d/60,
                   y = GcDuoObject$time2d,
