@@ -63,11 +63,6 @@ getMSP <- function(file){
     comm <- x[grep('^COMMENT: ',x,ignore.case = TRUE)]
     rts <- x[grep('ri. |retention.index. |retentionindex. ',tolower(x),ignore.case = TRUE)][1]
 
-    # Nist
-    rt_ <- unlist(regmatches(tolower(rts), gregexpr(
-      'ri.*[0-9]*|retention.index.*[0-9]*|retentionindex.*[0-9]*', tolower(rts))))
-    rtt <- gsub('ri.|retention.index. |retentionindex. ','',rt_, ignore.case=TRUE)
-
     # Number of m/z fragments
     npt <- x[grep('^Num Peaks: ',x, ignore.case=TRUE)]
     np <- gsub('^Num Peaks: ','',npt,ignore.case = TRUE)
@@ -83,7 +78,7 @@ getMSP <- function(file){
       # if any NAs remove from indx
       spectra <- cbind.data.frame(mz=mz,ins=ins)
       return(list(name=name,exactmass=exactmass, cas = cas, formula=formula, inchikey=inchikey,
-                  db.id = id, lib.id = library_id, ri = rtt, ri2 = rts, np = np,spectra=spectra))
+                  db.id = id, lib.id = library_id, ri = rts, np = np,spectra=spectra))
     }
 
   }
