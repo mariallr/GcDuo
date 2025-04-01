@@ -7,14 +7,14 @@
 
 ## Installation
 
-Required package 'EBImage`
+Required package `EBImage`
 
 ```r
 if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
-```
 
 BiocManager::install("EBImage")
+```
 
 
 #### Beta/Github release:
