@@ -173,13 +173,13 @@ Plot some peak that you are interested:
 ```{r}
 PlotPeak(GcDuoObject, finalGcDuo, peakid = "24-1", type = "eic", win_width = 30)
 
-PlotPeak(GcDuoObject, finalGCDuo, peakid = "24-1", type = "tic", win_width = 10)
+PlotPeak(GcDuoObject, finalGcDuo, peakid = "24-1", type = "tic", win_width = 30)
 ```
 
 Compare spectra with the library: 
 
 ```{r}
-SpectraView(GcDuoObject, finalGCDuo, peakid = "22-1", lib_comp = lib,
+SpectraView(GcDuoObject, finalGcDuo, peakid = "22-1", lib_comp = lib,
                              mzRange = c(30,600))
 ```
 
