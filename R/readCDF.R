@@ -199,7 +199,9 @@ readCDF <- function(filePath, modulationTime, mzRange)
 #' getSpectrumIntensity
 #'
 #' Composes an intensity spectrum
+#' @export
 #'
+
 getSpectrumIntensity <- function(mzs, points, index, ints, mz_seq)
 {
   point <- points[index] #number of mz
@@ -234,6 +236,7 @@ getSpectrumIntensity <- function(mzs, points, index, ints, mz_seq)
 #' uniformDimentions
 #'
 #' Uniforms the range of all dimentions between CDF files
+#' @export
 #'
 uniformDimentions <- function(data3DList, mzRange)
 {
