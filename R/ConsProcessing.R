@@ -40,7 +40,7 @@ ConsProcessing <- function(GcDuoObject, DuoResults, lib, win_width = 10)
 
   #if no ID has been done
   if(length(DuoResults) == 3){
-    DuoResults$id_peaks <- data.frame("Name" = paste0("Unknown", seq(1, nrow(results$cor_spectra))),
+    DuoResults$id_peaks <- data.frame("Name" = paste0("Unknown", seq(1, nrow(DuoResults$cor_spectra))),
                                       "id" = DuoResults$cor_spectra$id,
                                       "RT1" = DuoResults$cor_spectra$time1D,
                                       "RT2" = DuoResults$cor_spectra$time2D)
